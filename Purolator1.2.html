@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Purolator — Multi-Package Tracking</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --red:#DA291C; --blue:#003DA5; --text:#222; --muted:#555;
+    --border:#d0d0d0; --bg:#f5f5f5; --white:#fff;
+    --font:'Source Sans 3','Helvetica Neue',Helvetica,Arial,sans-serif;
+  }
+  body { font-family:var(--font); background:var(--bg); color:var(--text); font-size:15px; -webkit-font-smoothing:antialiased; }
+
+  /* ══ PUROLATOR HEADER — pixel-faithful ══ */
+
+  /* Sticky wrapper */
+  .site-header {
+    position:sticky; top:0; z-index:200;
+    background:#fff;
+    box-shadow:0 2px 8px rgba(0,0,0,.10);
+  }
+
+  /* ── Top utility bar ── */
+  .header-top {
+    border-bottom:1px solid #e8e8e8;
+    background:#fff;
+  }
+  .header-top-inner {
+    max-width:1200px; margin:0 auto;
+    padding:0 24px;
+    height:44px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+
+  /* Logo */
+  .puro-logo-wrap { display:flex; align-items:center; }
+  .puro-logo-wrap img {
+    height:22px; width:auto; display:block;
+  }
+  /* Fallback SVG logo if no image file */
+  .puro-logo-wrap svg { height:22px; }
+
+  /* Utility links (right side of top bar) */
+  .header-utils {
+    display:flex; align-items:center; gap:4px;
+  }
+  .util-link {
+    display:flex; align-items:center; gap:5px;
+    font-family:var(--font); font-size:13px; font-weight:400;
+    color:#333; text-decoration:none; padding:6px 10px;
+    border-radius:3px; white-space:nowrap;
+    transition:background .12s;
+    cursor:pointer; border:none; background:none;
+  }
+  .util-link:hover { background:#f0f5ff; color:var(--blue); }
+  .util-link svg { width:16px; height:16px; flex-shrink:0; color:#00a0b4; }
+  .util-link.login-btn {
+    background:var(--blue); color:#fff; font-weight:600;
+    border-radius:4px; padding:6px 16px;
+  }
+  .util-link.login-btn:hover { background:#002d80; }
+  .util-link.fr-link {
+    font-weight:600; color:#333; padding:6px 8px;
+  }
+  .util-divider {
+    width:1px; height:18px; background:#ddd; margin:0 2px; flex-shrink:0;
+  }
+
+  /* ── Main navigation bar ── */
+  .header-nav {
+    background:#fff;
+    border-bottom:1px solid #e8e8e8;
+  }
+  .header-nav-inner {
+    max-width:1200px; margin:0 auto;
+    padding:0 24px;
+    height:46px;
+    display:flex; align-items:center; justify-content:center;
+    gap:0;
+    position:relative;
+  }
+  .nav-item {
+    display:flex; align-items:center; gap:5px;
+    font-family:var(--font); font-size:14.5px; font-weight:400;
+    color:#333; text-decoration:none; padding:0 20px;
+    height:46px; cursor:pointer; white-space:nowrap;
+    border-bottom:3px solid transparent;
+    transition:border-color .15s, color .15s;
+    border:none; background:none;
+  }
+  .nav-item:hover { color:var(--blue); border-bottom:3px solid var(--blue); }
+  .nav-item svg { width:12px; height:12px; color:#777; flex-shrink:0; }
+
+  /* Search icon — right side */
+  .nav-search {
+    position:absolute; right:24px;
+    display:flex; align-items:center; justify-content:center;
+    width:38px; height:38px; border-radius:3px;
+    cursor:pointer; border:none; background:none;
+    transition:background .12s;
+  }
+  .nav-search:hover { background:#f0f0f0; }
+  .nav-search svg { width:18px; height:18px; color:#555; }
+
+  /* ── Breadcrumb ── */
+  .breadcrumb {
+    background:#fff; border-bottom:1px solid #ebebeb;
+    padding:8px 24px;
+    max-width:1200px; margin:0 auto;
+    display:flex; align-items:center; gap:6px;
+    font-size:13px; color:#666;
+  }
+  .breadcrumb a { color:#555; text-decoration:none; }
+  .breadcrumb a:hover { color:var(--blue); text-decoration:underline; }
+  .breadcrumb svg { width:13px; height:13px; color:#888; flex-shrink:0; }
+  .breadcrumb .sep { color:#bbb; }
+  .bc-wrap { background:#fff; border-bottom:1px solid #ebebeb; }
+
+  /* PAGE */
+  .page { max-width:620px; margin:0 auto; padding:20px 16px 60px; }
+
+  /* TOOLBAR */
+  .toolbar {
+    display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap;
+  }
+  .btn {
+    font-family:var(--font); font-size:13px; font-weight:600;
+    padding:8px 16px; border-radius:3px; border:none; cursor:pointer;
+    transition:background .13s, transform .1s;
+  }
+  .btn:active { transform:scale(.97); }
+  .btn-blue { background:var(--blue); color:#fff; }
+  .btn-blue:hover { background:#002d80; }
+  .btn-outline { background:#fff; color:#333; border:1px solid var(--border); }
+  .btn-outline:hover { background:#f0f0f0; }
+  .btn-green { background:#1a7a3a; color:#fff; }
+  .btn-green:hover { background:#145e2c; }
+  .btn-chat { background:#f0f4fb; color:var(--blue); border:1px solid #c5d3ec; }
+  .btn-chat:hover { background:#e0eaf8; }
+
+  /* COUNT BADGE */
+  .pkg-count {
+    margin-left:auto; font-size:12px; color:var(--muted);
+    background:#eee; padding:4px 10px; border-radius:20px;
+  }
+
+  /* FILTER BAR — rectangular tabs (see below) */
+  .filter-bar {
+    border-bottom:2px solid var(--border);
+    margin-bottom:14px;
+    display:flex; gap:0; flex-wrap:wrap;
+  }
+  .filter-btn {
+    font-family:var(--font); font-size:13px; font-weight:600;
+    padding:9px 18px; border-radius:0; border:none; border-bottom:3px solid transparent;
+    background:none; cursor:pointer; color:var(--muted);
+    transition:color .12s, border-color .12s;
+    margin-bottom:-2px;
+    white-space:nowrap;
+  }
+  .filter-btn.active { color:var(--blue); border-bottom-color:var(--blue); }
+  .filter-btn:hover:not(.active) { color:var(--blue); background:#f5f7fc; }
+
+
+  /* PACKAGE CARD */
+  .pkg-card {
+    background:var(--white); border:1px solid var(--border); border-radius:3px;
+    margin-bottom:12px; overflow:hidden;
+    animation: fadeIn .25s ease;
+  }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+  .pkg-header {
+    padding:13px 16px; display:flex; align-items:center; justify-content:space-between;
+    cursor:pointer; user-select:none; gap:10px; transition:background .12s;
+  }
+  .pkg-header:hover { background:#fafafa; }
+
+  .pkg-left { display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
+  .pkg-tracking {
+    font-size:13.5px; font-weight:700; color:var(--blue);
+    font-family:'Source Sans 3','Helvetica Neue',Helvetica,Arial,sans-serif;
+    letter-spacing:.3px;
+  }
+  .pkg-meta { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .pkg-label { font-size:13px; color:var(--muted); }
+  .pkg-dest { font-size:12px; color:#888; }
+
+  .pkg-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+
+  /* STATUS PILLS */
+  .status-pill {
+    font-size:11px; font-weight:700; padding:3px 9px; border-radius:2px;
+    cursor:pointer; white-space:nowrap; transition:opacity .12s; letter-spacing:.2px;
+  }
+  .status-pill:hover { opacity:.8; }
+  .sp-delivered { background:#e8f5ec; color:#1a7a3a; }
+  .sp-transit   { background:#e6edf8; color:var(--blue); }
+  .sp-delayed   { background:#fde8e7; color:var(--red); }
+  .sp-pending   { background:#fff4e0; color:#b45309; }
+  .sp-outfordelivery { background:#f0e8f8; color:#6b21a8; }
+
+  /* CHEVRON */
+  .chevron { width:17px; height:17px; color:#999; transition:transform .2s; flex-shrink:0; }
+  .pkg-card.open .chevron { transform:rotate(180deg); }
+
+  /* DELETE PKG */
+  .pkg-del {
+    background:none; border:none; cursor:pointer; color:#ccc; font-size:13px;
+    padding:3px 5px; border-radius:3px; transition:color .12s,background .12s; flex-shrink:0;
+  }
+  .pkg-del:hover { color:var(--red); background:#fde8e7; }
+
+  /* BODY */
+  .pkg-body { display:none; border-top:1px solid var(--border); }
+  .pkg-card.open .pkg-body { display:block; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { padding:10px 16px 6px; background:#fafafa; border-bottom:1px solid #eee; }
+  .progress-label {
+    display:flex; justify-content:space-between; font-size:11px;
+    color:var(--muted); margin-bottom:5px; font-weight:600; letter-spacing:.3px;
+  }
+  .progress-bar { height:4px; background:#e0e0e0; border-radius:2px; overflow:hidden; }
+  .progress-fill { height:100%; background:var(--blue); border-radius:2px; transition:width .4s; }
+  .progress-fill.delayed { background:var(--red); }
+  .progress-fill.done    { background:#1a7a3a; }
+
+  /* TABLE */
+  .track-table { width:100%; border-collapse:collapse; }
+  .track-table thead tr { background:#f7f7f7; border-bottom:1px solid var(--border); }
+  .track-table thead th { padding:8px 12px; text-align:left; font-size:11.5px; font-weight:700; color:#444; text-transform:uppercase; letter-spacing:.5px; }
+  .track-table tbody tr { border-bottom:1px solid #ebebeb; transition:background .1s; }
+  .track-table tbody tr:last-child { border-bottom:none; }
+  .track-table tbody tr:hover { background:#fafafa; }
+  .track-table tbody tr.alert-row td { color:var(--red); }
+  .track-table tbody td { padding:9px 12px; font-size:14px; line-height:1.4; vertical-align:top; }
+  .td-date { width:36%; white-space:nowrap; }
+  .td-city { width:26%; }
+  .td-desc { width:38%; }
+
+  /* EDITABLE */
+  [contenteditable="true"] {
+    outline:none; border-radius:2px; cursor:text; display:inline;
+    padding:1px 3px; margin:-1px -3px; transition:background .12s;
+  }
+  [contenteditable="true"]:hover  { background:rgba(0,61,165,.07); }
+  [contenteditable="true"]:focus  { background:rgba(0,61,165,.1); box-shadow:0 0 0 1px rgba(0,61,165,.3); }
+
+  /* ROW DELETE */
+  .row-actions { width:26px; text-align:right; padding-right:8px !important; }
+  .del-row {
+    background:none; border:none; cursor:pointer; color:#ccc; font-size:12px;
+    padding:2px 4px; border-radius:3px; transition:color .12s,background .12s; visibility:hidden;
+  }
+  tr:hover .del-row { visibility:visible; }
+  .del-row:hover { color:var(--red); background:#fde8e7; }
+
+  /* ADD ROW */
+  .add-row-bar {
+    padding:9px 14px; display:flex; gap:10px;
+    border-top:2px dashed #d8dde8; background:#f7f9fc;
+    align-items:center;
+  }
+  .btn-add-row {
+    font-family:var(--font); font-size:12.5px; font-weight:600;
+    padding:6px 14px; border-radius:3px; border:1.5px solid var(--blue);
+    background:#fff; cursor:pointer; color:var(--blue);
+    display:inline-flex; align-items:center; gap:5px;
+    transition:background .12s, box-shadow .12s;
+    box-shadow:0 1px 3px rgba(0,61,165,.08);
+  }
+  .btn-add-row:hover { background:#e6edf8; box-shadow:0 2px 6px rgba(0,61,165,.15); }
+  .btn-add-alert {
+    color:#0077a8; border-color:#0077a8;
+    box-shadow:0 1px 3px rgba(0,119,168,.08);
+  }
+  .btn-add-alert:hover { background:#e6f4f9; box-shadow:0 2px 6px rgba(0,119,168,.15); }
+
+  /* GENERATE MODAL */
+  .modal-overlay {
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:200;
+    align-items:center; justify-content:center;
+  }
+  .modal-overlay.visible { display:flex; }
+  .modal {
+    background:#fff; border-radius:6px; padding:28px 28px 24px; width:440px; max-width:95vw;
+    box-shadow:0 8px 40px rgba(0,0,0,.2); animation:fadeIn .2s ease;
+  }
+  .modal h3 { font-size:16px; font-weight:700; color:var(--blue); margin-bottom:6px; }
+  .modal p  { font-size:13px; color:var(--muted); margin-bottom:18px; }
+  .modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
+  .modal-field label { display:block; font-size:11.5px; font-weight:700; color:#444; text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px; }
+  .modal-field select, .modal-field input {
+    width:100%; font-family:var(--font); font-size:13px; padding:7px 10px;
+    border:1px solid var(--border); border-radius:3px; outline:none; color:var(--text);
+    transition:border .12s, box-shadow .12s;
+  }
+  .modal-field select:focus, .modal-field input:focus {
+    border-color:var(--blue); box-shadow:0 0 0 2px rgba(0,61,165,.12);
+  }
+  .modal-field.full { grid-column:1/-1; }
+  .modal-actions { display:flex; gap:10px; justify-content:flex-end; }
+  .btn-cancel { background:#f0f0f0; color:#444; border:none; }
+  .btn-cancel:hover { background:#e0e0e0; }
+
+
+  /* DATE BAR */
+  .date-bar {
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+    padding:10px 14px; background:#fff; border:1px solid var(--border);
+    border-radius:3px; flex-wrap:wrap;
+  }
+  .date-bar-label { font-size:13px; font-weight:600; color:#444; white-space:nowrap; }
+  .date-input {
+    font-family:var(--font); font-size:13px; padding:5px 10px;
+    border:1px solid var(--border); border-radius:3px; outline:none; color:var(--text);
+    transition:border .12s, box-shadow .12s;
+  }
+  .date-input:focus { border-color:var(--blue); box-shadow:0 0 0 2px rgba(0,61,165,.12); }
+  .btn-small { padding:5px 12px; font-size:12px; }
+  .date-hint { font-size:11.5px; color:#999; }
+
+  /* PAGINATION */
+  .pagination {
+    display:flex; align-items:center; justify-content:center;
+    gap:4px; padding:28px 0 40px; flex-wrap:wrap;
+  }
+  .page-btn {
+    font-family:var(--font); font-size:13px; font-weight:500;
+    width:36px; height:36px; border-radius:3px; border:1px solid var(--border);
+    background:#fff; color:#333; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .12s, color .12s, border-color .12s;
+    text-decoration:none;
+  }
+  .page-btn:hover { background:var(--blue); color:#fff; border-color:var(--blue); }
+  .page-btn.active { background:var(--blue); color:#fff; border-color:var(--blue); pointer-events:none; }
+  .page-btn.page-prev, .page-btn.page-next { width:auto; padding:0 12px; }
+  .page-dots { font-size:13px; color:#aaa; padding:0 4px; line-height:36px; }
+
+  @media print {
+    .toolbar,.filter-bar,.hint,.add-row-bar,.del-row,.pkg-del,.modal-overlay,.progress-wrap,
+    .header-utils,.header-nav,.bc-wrap { display:none !important; }
+    .pkg-body { display:block !important; }
+    body { background:#fff; }
+  }
+</style>
+<script id="icon-data">
+const ICON_CHAT  = 'data:image/webp;base64,UklGRqoCAABXRUJQVlA4WAoAAAAQAAAAIQAAIQAAQUxQSMsAAAABgGLb2rLl/j4FTe64TIKf9ts4cG3ePFJdk7tLdPgy1kik3+15ng8GEBETAFWa+5eXl7hX5iIArA9Z2U5gMCv8Y8eKVLZZBU1YVs372jp59SRDWAJjQ4qwyFFH2XF6yI44RbLcfUdXN7V9Nk2YB2M4RVjgqKbcJJKVJuLxeDw6kCZIlruItFbYssmzgIrH/srryNh42bGhOx7J/6FZ7tcpN6Ep8319y3p32KZDKaXaYGQ1obhICUB0OZtVApBS/BDeevdDeqwe4iaIAwBWUDgguAEAAPAMAJ0BKiIAIgA+MRSHQqIhDHWagBABgloAL4JQX5np5vAPxg3AGTd8nf3bzZ/3DEAfoz/ef8d74H8r/WbWAPRA8mj/If474RPI6JnfzB+mAWRAalm/RnxoJf5Um37UkKh4ICyjHdkK4UGPuHhuniAA/rO9/HH4w7AOX4C9RcRBwHYf6rOIjRXgqbQs20fo74/Ovgy0ZnVEdHZXgG/sIfr/gxWvsDs9jN0LH9MX6KlhVJtP+ItUM964e/z3/WV4rwP5e9wXLSwm2teCTQrO2XG8FxxyxEy/2GM+M/+LuaOeR5/wZ3Vu1VHMRsCcfwHW+KXwKjpgdm2qtl/JPIU5o0lfAFTzXz/OLV0qOVXg1taOP9/kl/0HUu2WPJ+cHiRalP/Zkl7s3RI7QlqwW39LYx1fuVqHT0G/54UTg0B/uZy75b+ed8HgIp3FxcvPs7uTiT4/i0Jn+Px0GdBdwETsNzT3RiAuImP/l5Nf7nTlPwMy01qKSH27e4/+e/BY1XyAZ3rF7OHd3IW2ASCRTi37j7LW/84+Iq2g1sep3inv/TuDkDLnHQOCGWdEdCs//sZCGdPYyD/AAAAA';
+const ICON_LOC   = 'data:image/webp;base64,UklGRioBAABXRUJQVlA4WAoAAAAQAAAAEwAAEwAAQUxQSHsAAAABdyAQICQ48T+oISISP7ipbVuNwswKIiEKGKtIyBoBo4FRxa+jIutXU6ECZnQRVBDR/wnY/QvFY5F0LUpuRemrCPxLforyy/6Rv8Cn9zN3hI7rmIHaIkQKBdhZrbrL1YoS4IBAJjFiM23LFhkjwCGBTFzf14TLv9B8FQEAVlA4IIgAAACwBQCdASoUABQAPjEUiEKiISEYBAAgAwSyADvQ+c/iTwgJgz4AD9ZvUA/sHsAfs76J4KDJJAAAm///tofWh9DoERm6/DLBnvmnp169NOESH//+uXeuXei3/2rzMdc590pz+i2kqvo1b7nHWHmfxHf95D4py43cxzLtSHscQNxjlFc/XL/ixoAA';
+const ICON_TRACK = 'data:image/webp;base64,UklGRqQDAABXRUJQVlA4WAoAAAAQAAAAHwAAIQAAQUxQSPkBAAABkCtt/+Iq73HXCoecRTuGyrVOH27CIWdwd3d3d6eiogvuF+CEzQzV8RnyIptFLyAiJoD/aG1qf+Zzl3t/V8uhNiN/U+X6bgv+nuCpated+Xd/08is+qW1GfbG61VgcKhe6QW/siwcHFH1VPPzAEpH34uzXJ9V/bRebQVKZ7/VOHPV9UDQo9eLYNBDIwtxWnsCOKS5Jki8UW0rMHcwNId6mLo2TUP5Q/XmiL1Ry3xeDmltq0tpZyPMVlcVETVZnQGNnZo6oDeh7KNehQJc0U/FcFMPZjQNU/TrYOj3Wl/3hyCv4yCtmZwmIa2PgYxqBnis8yGpuW4dC1v1NCSMTMBx3QVjtTtql56AICqIl9MkzNdHwMOfHgGPdD4kNZfRNIzVfAskHurDBLTkdSzM08xBvQnFH/UiQDAY4KJ+LIabejClnQ0wQ11MwcXqdGjo1FRdm86DsufqucRPiXPq8zKYp211HNKwCQZ/UvNPTp9+klc/DYamUA9D0KOngP5PjPmkP3BKewJgg5oGyudno7Lzy4FWdQNA1XPNzwEomzp/9+75U8sAZuX1WdVPDA7VM03EbjqjhoOJHpVVc3MaCjXMzanZURQe/Fy141Y6OXp0ct7NDtXng4lbuaHbX+zeUMkvDj7UHqfj0BB+Y+20A/fDnp7w/oFptcQEAFZQOCCEAQAAMAsAnQEqIAAiAD4xFIdCoiENVgIAEAGCWwAnTLCPxeJ/jt+t39u6aPcLst+rtWA5W79QPcB/AP8Z6gP0W3wD9SesA9AD9EfUu/vH7nfAN+vX7VfAR/KP7V/zAM3bADhqqBgA/t4SfrJxCysvLbiIFz/HbAYwcBoYx3/807gDnbw2Co4v//Kv5D7JmApGAakNjvS5tacf/zaDIzDBCn/6c7TpFg+ChMrOQopUKiy9WO8/Ftu1OUlvXe106PpnGtI2tIE9h1GBlv/+V7VKsuV7ATbw6y79QGLFg71X+p9sImgvONfKuWN2ngkgYR1ZafE9eL4ugvKLZJ7pcs4fWlaqs23NaHARZPg+bR0gB/PflAdIsDbZsX7Jbump//eVCaPkOO8YVpznlmX5pZeGzmQ4et23LKqQfVfiYjc1W8E7/UCVr34kKWwNDy5RBqPh9PeER/JHcIU3MWXIxjfyl5OLv0wnmypnhtR/mrH//6RBhl3SPYxFpI//9jCFxuhJSgmFbAAAAA==';
+const ICON_LOGIN = 'data:image/webp;base64,UklGRuYCAABXRUJQVlA4WAoAAAAQAAAAHgAAHwAAQUxQSKwAAAABcF3bVhPdid8UxnxLOVhC7sIuUiuAFjDZrFwriAgGbts2krp7+5JP4DBvMqrN82nqSN48ENr1G7Za7KFMv6NRm1zy3sP8slGL3stiXZLe03RJ0HsbAICw/lgBQPeEGrg7BneH7CklYo4EJUcFx+Hw4njR8JOKPIS/kOR44N5xP5MNBTKQnCDDUGFh6h3EdAoclUAA1O7FrNpN3rDboguFV+rHjX2/bRPLOw4TVlA4IBQCAAAQDgCdASofACAAPjEWiUOiISEUBAAgAwS2AE6ZQjgbyj8GP2Z/zPPuaBdxMlH309ID7VfUA3AH6yfsz2APQA/U/rAPQA/V30mf2A+BX9lv239lX/xopVnA/jWzR985/W5S8fSX89UkivoQ1NRFoGQ+cmav1JjYW9CAAP5vW9PExzFO8PD/+jz9v4g4I+7zvED3M7zX0/7wgQonsYQ8z1eahne763WlCrVNf3SGyamPH+f//zRGXBz868MoAHZ7kS1AcvEjBoMZd//vA/r3+CnTSRUrESr4iNObNQrDBz48b/In/nO5agjIoySc6oNsM+/kZX1sKkenKYHM94V2e+CVjkD6QGXOHWts/XqmhE//KwCUxp8MJTQ5nHjPkXVhOAHCBw2i+M+eo+YfV1/+i4G9GSX4k9+FTog4CnfxTy/bpGXXR8Kd+gw1S+we/0mfoe0bezcGkoj9USYbs6C6RnGSOWS1foSqztXm9FwhVA4o9PJFSrJEYQ6C3KVcIMOdV53FijmnAg1Fil1yPXJyu513tB0B2ET67paEclWO0iq6E1f4v4KFOznKkX3rUWXGpI7Ki9ZY6+CFfCiDJ5h2Uq+1QHryCFM3rHsEKdcf2YqZ9S7/32X0HcqSNE+hP4gwWuQG8TGQ30OFNnYUTenRWbhiT8c/+YZV63Yuq7aJM+mszclfX3gvIhQ5XGZ2c7OuApBMAGAA';
+</script>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     PUROLATOR HEADER — pixel-faithful replica
+     ══════════════════════════════════════════ -->
+<header class="site-header">
+
+  <!-- Top utility bar -->
+  <div class="header-top">
+    <div class="header-top-inner">
+
+      <!-- Logo — replace purolator-logo.png with your file -->
+      <div class="puro-logo-wrap">
+        <img src="data:image/png;base64,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" alt="Purolator">
+        <!-- SVG fallback if image file is missing -->
+        <svg style="display:none" viewBox="0 0 230 52" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="2,8 15,8 25,26 15,44 2,44 12,26" fill="#DA291C"/>
+          <polygon points="14,8 27,8 37,26 27,44 14,44 24,26" fill="#003DA5"/>
+          <text x="43" y="37" font-family="'Arial Black',sans-serif" font-weight="900" font-size="25" fill="#003DA5" letter-spacing="-0.3">Purolator</text>
+        </svg>
+      </div>
+
+      <!-- Utility links -->
+      <div class="header-utils">
+
+        <!-- Chat -->
+        <a class="util-link" href="#">
+          <svg class="chat-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.77 9.77 0 01-4-.84L3 20l1.09-3.27A7.93 7.93 0 013 12C3 7.582 7.03 4 12 4s9 3.582 9 8z"/>
+          </svg>
+          Chat
+        </a>
+        <div class="util-divider"></div>
+
+        <!-- Locations -->
+        <a class="util-link" href="#">
+          <svg class="loc-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9l9-7 9 7v11a1 1 0 01-1 1H4a1 1 0 01-1-1V9z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 22V12h6v10"/>
+          </svg>
+          Locations
+        </a>
+        <div class="util-divider"></div>
+
+        <!-- Track a Shipment -->
+        <a class="util-link" href="#">
+          <svg class="track-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="3"/>
+            <path stroke-linecap="round" d="M6.34 6.34a8 8 0 000 11.32M17.66 6.34a8 8 0 010 11.32"/>
+            <path stroke-linecap="round" d="M3.51 3.51a13.5 13.5 0 000 16.98M20.49 3.51a13.5 13.5 0 010 16.98"/>
+          </svg>
+          Track a Shipment
+        </a>
+        <div class="util-divider"></div>
+
+        <!-- PROPANADA -->
+        <a class="util-link" href="#">
+          <svg class="login-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          PROPANADA
+        </a>
+        <div class="util-divider"></div>
+
+        <!-- Login -->
+        <a class="util-link login-btn" href="#" id="btn-logout">Log Out</a>
+        <div class="util-divider"></div>
+
+        <!-- FR -->
+        <a class="util-link fr-link" href="#">FR</a>
+
+      </div><!-- /.header-utils -->
+    </div><!-- /.header-top-inner -->
+  </div><!-- /.header-top -->
+
+  <!-- Main navigation bar -->
+  <nav class="header-nav">
+    <div class="header-nav-inner">
+
+      <button class="nav-item">
+        Shipping
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+
+      <button class="nav-item">
+        Tracking
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+
+      <button class="nav-item">
+        Services
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+
+      <button class="nav-item">
+        Resources &amp; Support
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+
+      <!-- Search icon -->
+      <button class="nav-search" aria-label="Search">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </button>
+
+    </div>
+  </nav>
+
+  <!-- Breadcrumb -->
+  <div class="bc-wrap">
+    <div class="breadcrumb">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z"/></svg>
+      <a href="#">Home</a>
+      <span class="sep">/</span>
+      <a href="#">Services</a>
+      <span class="sep">/</span>
+      <a href="#">Business Solutions</a>
+      <span class="sep">/</span>
+      <span>Delivery Dashboard</span>
+    </div>
+  </div>
+
+</header>
+<script>
+(function(){
+  const icons = [
+    ['.chat-icon',  ICON_CHAT],
+    ['.loc-icon',   ICON_LOC],
+    ['.track-icon', ICON_TRACK],
+    ['.login-icon', ICON_LOGIN],
+  ];
+  icons.forEach(([sel, src]) => {
+    const el = document.querySelector(sel);
+    if(el){ const img=document.createElement('img'); img.src=src; img.style.cssText='width:18px;height:18px;object-fit:contain;'; el.replaceWith(img); }
+  });
+})();
+</script>
+
+<!-- PAGE -->
+<div class="page">
+  <div class="toolbar">
+    <button class="btn btn-chat" id="btn-generate">💬 Chat with an Agent</button>
+    <button class="btn btn-outline" onclick="window.print()">🖨️ Print</button>
+    <button class="btn btn-outline" id="btn-expand-all">Expand All</button>
+    <button class="btn btn-outline" id="btn-collapse-all">Collapse All</button>
+    <span class="pkg-count" id="pkg-count">0 packages</span>
+  </div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="delivered">Delivered</button>
+    <button class="filter-btn" data-filter="transit">In Transit</button>
+    <button class="filter-btn" data-filter="outfordelivery">Out for Delivery</button>
+    <button class="filter-btn" data-filter="delayed">Delayed</button>
+    <button class="filter-btn" data-filter="pending">Pending</button>
+  </div>
+
+  <div id="packages-list"></div>
+
+  <!-- FAKE PAGINATION -->
+  <div class="pagination" id="pagination">
+    <button class="page-btn page-prev" onclick="setPage(Math.max(1,currentPage-1))">‹ Prev</button>
+    <button class="page-btn active"    id="pg-1"  onclick="setPage(1)">1</button>
+    <button class="page-btn"           id="pg-2"  onclick="setPage(2)">2</button>
+    <button class="page-btn"           id="pg-3"  onclick="setPage(3)">3</button>
+    <button class="page-btn"           id="pg-4"  onclick="setPage(4)">4</button>
+    <button class="page-btn"           id="pg-5"  onclick="setPage(5)">5</button>
+    <span class="page-dots">…</span>
+    <button class="page-btn"           id="pg-8"  onclick="setPage(8)">8</button>
+    <button class="page-btn"           id="pg-9"  onclick="setPage(9)">9</button>
+    <button class="page-btn"           id="pg-10" onclick="setPage(10)">10</button>
+    <button class="page-btn page-next" onclick="setPage(Math.min(10,currentPage+1))">Next ›</button>
+  </div>
+</div>
+
+<!-- GENERATE MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3>💬 Chat with an Agent</h3>
+    <p>Generate one or more realistic shipments from Ottawa, ON.</p>
+    <div class="modal-grid">
+
+      <div class="modal-field full">
+        <label>Destination Province</label>
+        <select id="sel-province">
+          <option value="__RANDOM__">🎲 Random (75% outside Québec)</option>
+          <optgroup label="── Québec ──">
+            <option value="QC">Québec (QC)</option>
+          </optgroup>
+          <optgroup label="── Ontario ──">
+            <option value="ON">Ontario (ON)</option>
+          </optgroup>
+          <optgroup label="── West ──">
+            <option value="BC">British Columbia (BC)</option>
+            <option value="AB">Alberta (AB)</option>
+            <option value="MB">Manitoba (MB)</option>
+            <option value="SK">Saskatchewan (SK)</option>
+          </optgroup>
+          <optgroup label="── Atlantic ──">
+            <option value="NS">Nova Scotia (NS)</option>
+            <option value="NB">New Brunswick (NB)</option>
+            <option value="NL">Newfoundland &amp; Labrador (NL)</option>
+            <option value="PE">Prince Edward Island (PE)</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="modal-field full">
+        <label>Scenario</label>
+        <select id="sel-scenario">
+          <option value="__RANDOM__">🎲 Random scenario</option>
+        </select>
+      </div>
+
+      <div class="modal-field full">
+        <label>Order Label <span style="font-weight:400;text-transform:none;color:#999">(optional — ignored when qty &gt; 1)</span></label>
+        <input type="text" id="inp-label" placeholder="e.g. Order #1050 — Jean-Pierre Lévesque">
+      </div>
+
+      <div class="modal-field full">
+        <label>Quantity — how many shipments to generate</label>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <input type="range" id="inp-qty" min="1" max="50" value="1"
+                 style="flex:1;accent-color:var(--blue);"
+                 oninput="document.getElementById('qty-display').textContent=this.value">
+          <span id="qty-display"
+                style="font-family:'Courier New',monospace;font-weight:700;font-size:16px;
+                       color:var(--blue);min-width:36px;text-align:center;
+                       background:#e6edf8;padding:4px 8px;border-radius:4px;">1</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-top:3px;">
+          <span>1</span><span>25</span><span>50</span>
+        </div>
+      </div>
+
+      <div class="modal-field full" style="border-top:1px solid #eee;padding-top:14px;margin-top:2px;">
+        <label style="display:flex;align-items:center;gap:6px;">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Reference Date
+          <span style="font-weight:400;text-transform:none;color:#999;font-size:11px">(all package dates recalculate)</span>
+        </label>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <input type="date" id="master-date" class="date-input" style="flex:1;min-width:140px;">
+          <button class="btn btn-blue btn-small" id="btn-apply-date" style="white-space:nowrap;">Apply to all packages</button>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel btn-outline" id="btn-modal-cancel">Cancel</button>
+      <button class="btn btn-green" id="btn-modal-generate">Generate ⚡</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// DATA ENGINE
+// ══════════════════════════════════════════════════════════════════
+
+// ── Names by region ──────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+// MASTER NAME LISTS  (90% male, 10% female per pool)
+// ══════════════════════════════════════════════════════════════════
+const NAMES_QC_M = [
+  // ── Traditional Québécois ──
+  'Marc Ouellet','Jean-François Côté','Alexis Bouchard','Sébastien Desrochers',
+  'Émile Gagnon','Louis-Philippe Fortin','Raphaël Bélanger','Antoine Chartrand',
+  'Nicolas Gauthier','Félix Thibault','Jonathan Bergeron','Mathieu Pelletier',
+  'Samuel Lavoie','Étienne Tremblay','Xavier Girard','Francis Lebrun',
+  'Gabriel Parent','Olivier Dufresne','Charles-Antoine Roy','Philippe Chartier',
+  'Maxime Labrecque','Simon Beaupré','Vincent Morissette','Dominic Lefebvre',
+  'William Lachance','Benoit Martel','Stéphane Desjardins','Frédéric Plante',
+  'Pascal Auger','Luc Brousseau','Denis Vallée','Martin Poirier',
+  'Patrice Simard','Rémi Lacombe','Hugo Grondin','Alexis Turgeon',
+  'Cédric Marcoux','Jérémie Boutin','Yannick Charest','Loïc Demers',
+  'Edouard Caron','Pierre-Luc Vézina','Julien Massé','Nathan Houle',
+  'Sébastien Côté','François Lévesque','Thierry Bisson','Renaud Chartrand',
+  'Charles Dupuis','David Arsenault',
+  // ── Additional QC Male (batch 2) ──
+  'Tristan Morin','Kevin Perreault','Alexandre Boisvert','Jonathan Therrien',
+  'Mathis Racine','Raphaël Lacroix','Théodore Lemieux','Bastien Rousseau',
+  'Léo Bélanger','Noé Cloutier','Éliot Fortier','Christophe Gagné',
+  'Damien Robitaille','Florian Huot','Léon Paradis','Alexis Veilleux',
+  'Corentin Gosselin','Erwan Dumas','Kévin Bissonnette','Tristan Lefebvre',
+  'Éric Langlois','Denis Hébert','Michel Séguin','Alain Couture',
+  'Pierre Blouin','Robert Gendron','Daniel Breton','Jacques Picard',
+  'Gilles Champagne','Normand Dubois','André Laflamme','Claude Marquis',
+  'Serge Fournier','Christian Lamontagne','Patrick Hamel','Simon Marcotte',
+  'Félix Bellemare','Maxime Lepage','Olivier Grenier','Jordan Lacombe',
+  'Francis Paquette','William Moisan','Thomas Côté','Raphaël Dubé',
+  'Hugo Martineau','Nathan Champagne','Lucas Rioux','Alexis Provost',
+  'Samuel Bélanger','Gabriel Bergeron',
+];
+const NAMES_QC_F = [
+  'Sophie Bergeron','Julie Tremblay','Isabelle Pelletier','Christine Leblanc',
+  'Nathalie Roy','Geneviève Lavoie','Madeleine Dufresne','Camille Girard',
+  'Élodie Parent','Marianne Lebrun',
+  'Véronique Simard','Mélanie Fontaine','Andrée Bouchard','Laurence Mercier',
+  'Valérie Corriveau','Émilie Thibeault','Florence Grenier','Audrey Beaulieu',
+  'Chantal Hébert','Josée Poirier',
+];
+const NAMES_EN_M = [
+  'James Mitchell','Ryan O\'Brien','Kevin MacDonald','Tyler Watson',
+  'Andrew Fraser','Colin Murphy','Brandon Lee','Dylan Walker',
+  'Patrick Nguyen','Michael Park','Nathan Clarke','Logan Henderson',
+  'Ethan Burns','Cameron Morrison','Jordan Campbell','Austin Graham',
+  'Blake Watson','Evan Singh','Connor Fraser','Mason Chen',
+  'Lucas Bennett','Liam Parker','Owen Thompson','Noah Walker',
+  'Jayden Scott','Aiden Roberts','Hunter Davis','Garrett Wilson',
+  'Colton Harris','Brody Martinez','Cody Anderson','Riley Jackson',
+  'Brent Taylor','Troy Lewis','Kyle Nelson','Craig Young',
+  'Dale King','Shawn Wright','Wade Hall','Glen Adams',
+  'Chad Baker','Barry Carter','Earl Mitchell','Rex Turner',
+  'Boyd Phillips','Chester Evans','Floyd Collins','Archie Stewart',
+  'Warren Morris','Floyd Bell',
+  // ── Batch 2 ──
+  'Ethan Clarke','Jackson Reid','Oliver Bennett','Henry Walsh',
+  'Charlie Armstrong','Theodore Hughes','Sebastian Grant','Adrian Ellis',
+  'Nolan Burke','Declan Murray','Kieran Flynn','Rory Gallagher',
+  'Finn Donovan','Cillian Brennan','Callum MacLeod','Hamish Robertson',
+  'Alistair Douglas','Duncan Campbell','Angus Ferguson','Malcolm Stewart',
+  'Derek Paterson','Scott Henderson','Ian Thomson','Stuart Wilson',
+  'Bruce Hamilton','Neil McAllister','Ross Crawford','Grant Johnston',
+  'Darren McKenzie','Kyle Patterson','Brendan Sullivan','Sean Fitzgerald',
+  'Conor McCarthy','Niall Byrne','Ronan Kelly','Cormac Quinn',
+  'Darragh Walsh','Tadhg Murphy','Eoin Doyle','Ciaran Nolan',
+  // ── Batch 3 — diverse Canadian surnames ──
+  'Marcus Johnson','Darius Williams','Malik Thompson','Isaiah Brown',
+  'Elijah Davis','Xavier Martinez','Adrian Hernandez','Diego Ramirez',
+  'Carlos Gonzalez','Luis Morales','Pablo Torres','Juan Flores',
+  'Wei Zhang','Ming Li','Jian Wang','Hao Chen','Yong Liu','Bo Zhao',
+  'Arjun Sharma','Rajan Patel','Vikram Singh','Anil Kumar','Suresh Rao',
+  'Hamid Al-Rashid','Omar Hassan','Tariq Ibrahim','Karim Mahmoud',
+];
+const NAMES_EN_F = [
+  'Sarah Thompson','Emily Clarke','Laura Henderson','Jessica Graham',
+  'Stephanie Burns','Rachel Morrison','Heather Campbell','Natalie Singh',
+  'Amanda Chen','Olivia Bennett',
+  'Katherine Reid','Megan Walsh','Fiona MacLeod','Siobhan Murphy',
+  'Aoife Brennan','Caitlin Flynn','Niamh Gallagher','Maeve Doyle',
+  'Grace Kelly','Erin Sullivan',
+  'Priya Sharma','Ananya Patel','Divya Singh','Meera Kumar',
+  'Aisha Hassan','Layla Ibrahim','Maya Martinez','Sofia Ramirez',
+  'Isabella Torres','Valentina Flores',
+];
+
+// Weighted pool: 90% male, 10% female
+function buildPool(males, females) {
+  const pool = [];
+  for(let i=0;i<9;i++) pool.push(...males);
+  pool.push(...females);
+  return pool;
+}
+const NAMES = {
+  QC: buildPool(NAMES_QC_M, NAMES_QC_F),
+  EN: buildPool(NAMES_EN_M, NAMES_EN_F),
+};
+
+// ══════════════════════════════════════════════════════════════════
+// MASTER DATE OFFSET SYSTEM
+// ══════════════════════════════════════════════════════════════════
+// Each generated package stores its dates as offsets (hours) from
+// a reference pickup time. When user changes the master date,
+// we recompute all displayed dates.
+let MASTER_DATE = (function(){
+  const d = new Date();
+  d.setHours(0, 0, 0, 0); // midnight — prevent time bleed into date math
+  return d;
+})();
+
+function setMasterDate(dateStr) {
+  // dateStr = 'YYYY-MM-DD'
+  const [y,m,d] = dateStr.split('-').map(Number);
+  MASTER_DATE = new Date(y, m-1, d, 0, 0, 0); // midnight — prevent time bleed
+}
+
+// We track all cards' offset data so we can re-render dates
+const CARD_OFFSETS = new Map(); // card element → array of minute offsets from pickup
+
+// ══════════════════════════════════════════════════════════════════
+// CITIES — 130+ Canadian cities
+// weight: 4 = major metro (picked 4× more often)
+//         2 = mid-size city
+//         1 = small city / town
+// rand() picks from a weighted pool so big cities appear more often
+// ══════════════════════════════════════════════════════════════════
+const CITIES_RAW = {
+  // ── QUÉBEC (20 cities) ────────────────────────────────────────
+  QC: [
+    { name:'Montréal, QC',           w:4 },
+    { name:'Québec City, QC',        w:4 },
+    { name:'Laval, QC',              w:4 },
+    { name:'Longueuil, QC',          w:3 },
+    { name:'Gatineau, QC',           w:3 },
+    { name:'Sherbrooke, QC',         w:3 },
+    { name:'Lévis, QC',              w:2 },
+    { name:'Trois-Rivières, QC',     w:2 },
+    { name:'Terrebonne, QC',         w:2 },
+    { name:'Saguenay, QC',           w:2 },
+    { name:'Saint-Jean-sur-Richelieu, QC', w:2 },
+    { name:'Repentigny, QC',         w:2 },
+    { name:'Brossard, QC',           w:2 },
+    { name:'Drummondville, QC',      w:1 },
+    { name:'Saint-Jérôme, QC',       w:1 },
+    { name:'Granby, QC',             w:1 },
+    { name:'Blainville, QC',         w:1 },
+    { name:'Victoriaville, QC',      w:1 },
+    { name:'Rimouski, QC',           w:1 },
+    { name:'Shawinigan, QC',         w:1 },
+  ],
+  // ── ONTARIO (30 cities) ────────────────────────────────────────
+  ON: [
+    { name:'Toronto, ON',            w:4 },
+    { name:'Mississauga, ON',        w:4 },
+    { name:'Brampton, ON',           w:4 },
+    { name:'Hamilton, ON',           w:3 },
+    { name:'Ottawa, ON',             w:3 },
+    { name:'London, ON',             w:3 },
+    { name:'Markham, ON',            w:3 },
+    { name:'Vaughan, ON',            w:3 },
+    { name:'Kitchener, ON',          w:3 },
+    { name:'Windsor, ON',            w:2 },
+    { name:'Richmond Hill, ON',      w:2 },
+    { name:'Oakville, ON',           w:2 },
+    { name:'Burlington, ON',         w:2 },
+    { name:'Sudbury, ON',            w:2 },
+    { name:'Oshawa, ON',             w:2 },
+    { name:'Barrie, ON',             w:2 },
+    { name:'Kingston, ON',           w:2 },
+    { name:'Guelph, ON',             w:2 },
+    { name:'Ajax, ON',               w:1 },
+    { name:'Whitby, ON',             w:1 },
+    { name:'Thunder Bay, ON',        w:1 },
+    { name:'Waterloo, ON',           w:1 },
+    { name:'Cambridge, ON',          w:1 },
+    { name:'Pickering, ON',          w:1 },
+    { name:'Niagara Falls, ON',      w:1 },
+    { name:'Peterborough, ON',       w:1 },
+    { name:'St. Catharines, ON',     w:1 },
+    { name:'North Bay, ON',          w:1 },
+    { name:'Sault Ste. Marie, ON',   w:1 },
+    { name:'Sarnia, ON',             w:1 },
+  ],
+  // ── BRITISH COLUMBIA (15 cities) ──────────────────────────────
+  BC: [
+    { name:'Vancouver, BC',          w:4 },
+    { name:'Surrey, BC',             w:4 },
+    { name:'Burnaby, BC',            w:4 },
+    { name:'Richmond, BC',           w:3 },
+    { name:'Abbotsford, BC',         w:3 },
+    { name:'Coquitlam, BC',          w:3 },
+    { name:'Kelowna, BC',            w:3 },
+    { name:'Victoria, BC',           w:3 },
+    { name:'Langley, BC',            w:2 },
+    { name:'Delta, BC',              w:2 },
+    { name:'Kamloops, BC',           w:2 },
+    { name:'Nanaimo, BC',            w:2 },
+    { name:'Prince George, BC',      w:1 },
+    { name:'Chilliwack, BC',         w:1 },
+    { name:'Vernon, BC',             w:1 },
+  ],
+  // ── ALBERTA (14 cities) ───────────────────────────────────────
+  AB: [
+    { name:'Calgary, AB',            w:4 },
+    { name:'Edmonton, AB',           w:4 },
+    { name:'Red Deer, AB',           w:3 },
+    { name:'Lethbridge, AB',         w:3 },
+    { name:'St. Albert, AB',         w:2 },
+    { name:'Medicine Hat, AB',       w:2 },
+    { name:'Grande Prairie, AB',     w:2 },
+    { name:'Airdrie, AB',            w:2 },
+    { name:'Sherwood Park, AB',      w:2 },
+    { name:'Spruce Grove, AB',       w:1 },
+    { name:'Leduc, AB',              w:1 },
+    { name:'Beaumont, AB',           w:1 },
+    { name:'Cochrane, AB',           w:1 },
+    { name:'Okotoks, AB',            w:1 },
+  ],
+  // ── MANITOBA (8 cities) ───────────────────────────────────────
+  MB: [
+    { name:'Winnipeg, MB',           w:4 },
+    { name:'Brandon, MB',            w:3 },
+    { name:'Steinbach, MB',          w:2 },
+    { name:'Thompson, MB',           w:2 },
+    { name:'Portage la Prairie, MB', w:1 },
+    { name:'Selkirk, MB',            w:1 },
+    { name:'Morden, MB',             w:1 },
+    { name:'Winkler, MB',            w:1 },
+  ],
+  // ── SASKATCHEWAN (10 cities) ──────────────────────────────────
+  SK: [
+    { name:'Saskatoon, SK',          w:4 },
+    { name:'Regina, SK',             w:4 },
+    { name:'Prince Albert, SK',      w:2 },
+    { name:'Moose Jaw, SK',          w:2 },
+    { name:'Swift Current, SK',      w:2 },
+    { name:'Yorkton, SK',            w:1 },
+    { name:'North Battleford, SK',   w:1 },
+    { name:'Lloydminster, SK',       w:1 },
+    { name:'Melfort, SK',            w:1 },
+    { name:'Estevan, SK',            w:1 },
+  ],
+  // ── NOVA SCOTIA (8 cities) ────────────────────────────────────
+  NS: [
+    { name:'Halifax, NS',            w:4 },
+    { name:'Dartmouth, NS',          w:3 },
+    { name:'Sydney, NS',             w:3 },
+    { name:'Truro, NS',              w:2 },
+    { name:'New Glasgow, NS',        w:2 },
+    { name:'Glace Bay, NS',          w:1 },
+    { name:'Kentville, NS',          w:1 },
+    { name:'Bridgewater, NS',        w:1 },
+  ],
+  // ── NEW BRUNSWICK (9 cities) ──────────────────────────────────
+  NB: [
+    { name:'Moncton, NB',            w:4 },
+    { name:'Saint John, NB',         w:4 },
+    { name:'Fredericton, NB',        w:3 },
+    { name:'Dieppe, NB',             w:2 },
+    { name:'Riverview, NB',          w:2 },
+    { name:'Bathurst, NB',           w:1 },
+    { name:'Edmundston, NB',         w:1 },
+    { name:'Miramichi, NB',          w:1 },
+    { name:'Campbellton, NB',        w:1 },
+  ],
+  // ── NEWFOUNDLAND (7 cities) ───────────────────────────────────
+  NL: [
+    { name:"St. John's, NL",         w:4 },
+    { name:'Mount Pearl, NL',        w:3 },
+    { name:'Conception Bay South, NL',w:2 },
+    { name:'Corner Brook, NL',       w:2 },
+    { name:'Paradise, NL',           w:2 },
+    { name:'Grand Falls-Windsor, NL',w:1 },
+    { name:'Gander, NL',             w:1 },
+  ],
+  // ── PRINCE EDWARD ISLAND (5 cities) ──────────────────────────
+  PE: [
+    { name:'Charlottetown, PE',      w:4 },
+    { name:'Summerside, PE',         w:3 },
+    { name:'Stratford, PE',          w:2 },
+    { name:'Cornwall, PE',           w:1 },
+    { name:'Montague, PE',           w:1 },
+  ],
+};
+
+// Build weighted city pools — large cities appear proportionally more often
+const CITIES = {};
+Object.keys(CITIES_RAW).forEach(prov => {
+  const pool = [];
+  CITIES_RAW[prov].forEach(city => {
+    for (let i = 0; i < city.w; i++) pool.push({ name: city.name });
+  });
+  CITIES[prov] = pool;
+});
+
+// ══════════════════════════════════════════════════════════════════
+// ROUTES — day-anchored (day=days after pickup, hour=hour of day)
+// Rules: QC=2 days, ON=2 days, all other provinces=3 days
+// Out-for-delivery always at 5:00 AM or 6:00 AM
+// Delivery snapped to 9 AM–1 PM window
+// ══════════════════════════════════════════════════════════════════
+const ROUTES = {
+  // ── QC: 2 business days (most destinations via Montréal sort) ────
+  QC: {
+    transitDays: 2,
+    steps: [
+      { day:0, hour:17, min:30, hub:'Ottawa, ON',   desc:'Arrived at sort facility' },
+      { day:0, hour:22, min:0,  hub:'Ottawa, ON',   desc:'Departed sort facility' },
+      { day:1, hour:2,  min:15, hub:'Montréal, QC', desc:'Arrived at sort facility' },
+      { day:1, hour:5,  min:0,  hub:'Montréal, QC', desc:'Departed sort facility' },
+      { day:1, hour:9,  min:30, hub:'__DEST__',     desc:'Arrived at sort facility' },
+    ]
+  },
+  // ── QC_NEAR: Gatineau — direct from Ottawa (across the river) ───
+  QC_NEAR: {
+    transitDays: 1,
+    steps: [
+      { day:0, hour:17, min:30, hub:'Ottawa, ON',   desc:'Arrived at sort facility' },
+      { day:0, hour:19, min:0,  hub:'Ottawa, ON',   desc:'Departed sort facility' },
+      { day:0, hour:20, min:0,  hub:'__DEST__',     desc:'Arrived at sort facility' },
+    ]
+  },
+  // ── QC_EAST: Québec City, Saguenay, Rimouski, etc. ─────────────
+  QC_EAST: {
+    transitDays: 2,
+    steps: [
+      { day:0, hour:17, min:30, hub:'Ottawa, ON',      desc:'Arrived at sort facility' },
+      { day:0, hour:22, min:0,  hub:'Ottawa, ON',      desc:'Departed sort facility' },
+      { day:1, hour:2,  min:15, hub:'Montréal, QC',    desc:'Arrived at sort facility' },
+      { day:1, hour:5,  min:0,  hub:'Montréal, QC',    desc:'Departed sort facility' },
+      { day:1, hour:10, min:0,  hub:'Québec City, QC', desc:'Arrived at sort facility' },
+      { day:1, hour:13, min:30, hub:'__DEST__',        desc:'Arrived at sort facility' },
+    ]
+  },
+  // ── ON: 2 business days (Toronto metro / SW Ontario) ────────────
+  ON: {
+    transitDays: 2,
+    steps: [
+      { day:0, hour:17, min:30, hub:'Ottawa, ON',   desc:'Arrived at sort facility' },
+      { day:0, hour:22, min:30, hub:'Ottawa, ON',   desc:'Departed sort facility' },
+      { day:1, hour:4,  min:30, hub:'Toronto, ON',  desc:'Arrived at sort facility' },
+      { day:1, hour:7,  min:0,  hub:'Toronto, ON',  desc:'Departed sort facility' },
+      { day:1, hour:11, min:30, hub:'__DEST__',     desc:'Arrived at sort facility' },
+    ]
+  },
+  // ── ON_EAST: Kingston, Peterborough — direct from Ottawa ─────────
+  ON_EAST: {
+    transitDays: 1,
+    steps: [
+      { day:0, hour:17, min:30, hub:'Ottawa, ON',   desc:'Arrived at sort facility' },
+      { day:0, hour:19, min:30, hub:'Ottawa, ON',   desc:'Departed sort facility' },
+      { day:0, hour:22, min:0,  hub:'__DEST__',     desc:'Arrived at sort facility' },
+    ]
+  },
+  // ── NB: 3 days ───────────────────────────────────────────
+  NB: {
+    transitDays: 3,
+    steps: [
+      { day:0, hour:17, min:30, hub:'Ottawa, ON',   desc:'Arrived at sort facility' },
+      { day:0, hour:22, min:0,  hub:'Ottawa, ON',   desc:'Departed sort facility' },
+      { day:1, hour:2,  min:0,  hub:'Montréal, QC', desc:'Arrived at sort facility' },
+      { day:1, hour:5,  min:0,  hub:'Montréal, QC', desc:'Departed sort facility' },
+      { day:1, hour:14, min:0,  hub:'Moncton, NB',  desc:'Arrived at sort facility' },
+      { day:2, hour:5,  min:0,  hub:'Moncton, NB',  desc:'Departed sort facility' },
+      { day:2, hour:10, min:0,  hub:'__DEST__',     desc:'Arrived at sort facility' },
+    ]
+  },
+  // ── NS: 3 days ───────────────────────────────────────────
+  NS: {
+    transitDays: 3,
+    steps: [
+      { day:0, hour:17, min:30, hub:'Ottawa, ON',   desc:'Arrived at sort facility' },
+      { day:0, hour:22, min:0,  hub:'Ottawa, ON',   desc:'Departed sort facility' },
+      { day:1, hour:2,  min:0,  hub:'Montréal, QC', desc:'Arrived at sort facility' },
+      { day:1, hour:5,  min:0,  hub:'Montréal, QC', desc:'Departed sort facility' },
+      { day:1, hour:14, min:0,  hub:'Moncton, NB',  desc:'Arrived at sort facility' },
+      { day:2, hour:3,  min:0,  hub:'Moncton, NB',  desc:'Departed sort facility' },
+      { day:2, hour:8,  min:30, hub:'Halifax, NS',  desc:'Arrived at sort facility' },
+      { day:2, hour:10, min:0,  hub:'__DEST__',     desc:'Arrived at sort facility' },
+    ]
+  },
+  // ── PE: 3 days ───────────────────────────────────────────
+  PE: {
+    transitDays: 3,
+    steps: [
+      { day:0, hour:17, min:30, hub:'Ottawa, ON',          desc:'Arrived at sort facility' },
+      { day:0, hour:22, min:0,  hub:'Ottawa, ON',          desc:'Departed sort facility' },
+      { day:1, hour:2,  min:0,  hub:'Montréal, QC',        desc:'Arrived at sort facility' },
+      { day:1, hour:5,  min:0,  hub:'Montréal, QC',        desc:'Departed sort facility' },
+      { day:1, hour:14, min:0,  hub:'Moncton, NB',         desc:'Arrived at sort facility' },
+      { day:2, hour:4,  min:0,  hub:'Moncton, NB',         desc:'Departed sort facility' },
+      { day:2, hour:9,  min:0,  hub:'Charlottetown, PE',   desc:'Arrived at sort facility' },
+      { day:2, hour:11, min:0,  hub:'__DEST__',            desc:'Arrived at sort facility' },
+    ]
+  },
+  // ── NL: 3 days ───────────────────────────────────────────
+  NL: {
+    transitDays: 3,
+    steps: [
+      { day:0, hour:17, min:30, hub:'Ottawa, ON',      desc:'Arrived at sort facility' },
+      { day:0, hour:22, min:0,  hub:'Ottawa, ON',      desc:'Departed sort facility' },
+      { day:1, hour:2,  min:0,  hub:'Montréal, QC',    desc:'Arrived at sort facility' },
+      { day:1, hour:5,  min:0,  hub:'Montréal, QC',    desc:'Departed sort facility' },
+      { day:1, hour:18, min:0,  hub:'Halifax, NS',     desc:'Arrived at sort facility' },
+      { day:2, hour:3,  min:0,  hub:'Halifax, NS',     desc:'Departed sort facility' },
+      { day:2, hour:14, min:0,  hub:"St. John's, NL",  desc:'Arrived at sort facility' },
+      { day:2, hour:16, min:0,  hub:'__DEST__',        desc:'Arrived at sort facility' },
+    ]
+  },
+  // ── MB: 3 days ───────────────────────────────────────────
+  MB: {
+    transitDays: 3,
+    steps: [
+      { day:0, hour:17, min:30, hub:'Ottawa, ON',    desc:'Arrived at sort facility' },
+      { day:0, hour:22, min:30, hub:'Ottawa, ON',    desc:'Departed sort facility' },
+      { day:1, hour:4,  min:30, hub:'Toronto, ON',   desc:'Arrived at sort facility' },
+      { day:1, hour:7,  min:0,  hub:'Toronto, ON',   desc:'Departed sort facility' },
+      { day:2, hour:1,  min:0,  hub:'Winnipeg, MB',  desc:'Arrived at sort facility' },
+      { day:2, hour:5,  min:30, hub:'Winnipeg, MB',  desc:'Departed sort facility' },
+      { day:2, hour:10, min:0,  hub:'__DEST__',      desc:'Arrived at sort facility' },
+    ]
+  },
+  // ── SK: 3 days ───────────────────────────────────────────
+  SK: {
+    transitDays: 3,
+    steps: [
+      { day:0, hour:17, min:30, hub:'Ottawa, ON',    desc:'Arrived at sort facility' },
+      { day:0, hour:22, min:30, hub:'Ottawa, ON',    desc:'Departed sort facility' },
+      { day:1, hour:4,  min:30, hub:'Toronto, ON',   desc:'Arrived at sort facility' },
+      { day:1, hour:7,  min:0,  hub:'Toronto, ON',   desc:'Departed sort facility' },
+      { day:2, hour:1,  min:0,  hub:'Winnipeg, MB',  desc:'Arrived at sort facility' },
+      { day:2, hour:5,  min:0,  hub:'Winnipeg, MB',  desc:'Departed sort facility' },
+      { day:2, hour:14, min:0,  hub:'Regina, SK',    desc:'Arrived at sort facility' },
+      { day:2, hour:16, min:0,  hub:'__DEST__',      desc:'Arrived at sort facility' },
+    ]
+  },
+  // ── AB: 3 days ───────────────────────────────────────────
+  AB: {
+    transitDays: 3,
+    steps: [
+      { day:0, hour:17, min:30, hub:'Ottawa, ON',   desc:'Arrived at sort facility' },
+      { day:0, hour:22, min:30, hub:'Ottawa, ON',   desc:'Departed sort facility' },
+      { day:1, hour:4,  min:30, hub:'Toronto, ON',  desc:'Arrived at sort facility' },
+      { day:1, hour:7,  min:0,  hub:'Toronto, ON',  desc:'Departed sort facility' },
+      { day:2, hour:1,  min:0,  hub:'Winnipeg, MB', desc:'Arrived at sort facility' },
+      { day:2, hour:5,  min:0,  hub:'Winnipeg, MB', desc:'Departed sort facility' },
+      { day:2, hour:16, min:0,  hub:'Calgary, AB',  desc:'Arrived at sort facility' },
+      { day:2, hour:18, min:0,  hub:'__DEST__',     desc:'Arrived at sort facility' },
+    ]
+  },
+  // ── BC: 3 days ───────────────────────────────────────────
+  BC: {
+    transitDays: 3,
+    steps: [
+      { day:0, hour:17, min:30, hub:'Ottawa, ON',    desc:'Arrived at sort facility' },
+      { day:0, hour:22, min:30, hub:'Ottawa, ON',    desc:'Departed sort facility' },
+      { day:1, hour:4,  min:30, hub:'Toronto, ON',   desc:'Arrived at sort facility' },
+      { day:1, hour:7,  min:0,  hub:'Toronto, ON',   desc:'Departed sort facility' },
+      { day:2, hour:1,  min:0,  hub:'Winnipeg, MB',  desc:'Arrived at sort facility' },
+      { day:2, hour:5,  min:0,  hub:'Winnipeg, MB',  desc:'Departed sort facility' },
+      { day:2, hour:16, min:0,  hub:'Calgary, AB',   desc:'Arrived at sort facility' },
+      { day:2, hour:20, min:0,  hub:'Calgary, AB',   desc:'Departed sort facility' },
+      { day:3, hour:4,  min:0,  hub:'Vancouver, BC', desc:'Arrived at sort facility' },
+      { day:3, hour:6,  min:0,  hub:'__DEST__',      desc:'Arrived at sort facility' },
+    ]
+  },
+};
+
+// ══════════════════════════════════════════════════════════════════
+// SCENARIO REGISTRY
+// Maps scenario key → { status, alertMsg?, terminalEvents fn }
+// ══════════════════════════════════════════════════════════════════
+
+// ── Scenario definitions (human-readable for modal dropdown) ──────
+const SCENARIO_DEFS = [
+  // ── CLEAN DELIVERIES ──────────────────────────────────────────
+  { key:'clean',              label:'✅ Delivered — standard',                  group:'Delivered'       },
+  { key:'clean_signature',    label:'✅ Delivered — signature obtained',         group:'Delivered'       },
+  { key:'clean_door',         label:'✅ Delivered — left at front door',         group:'Delivered'       },
+  { key:'clean_reception',    label:'✅ Delivered — left at reception desk',     group:'Delivered'       },
+  { key:'clean_locker',       label:'✅ Delivered — deposited in parcel locker', group:'Delivered'       },
+  // ── OUT FOR DELIVERY ──────────────────────────────────────────
+  { key:'outfordelivery',     label:'🚚 Out for delivery — standard',            group:'Out for Delivery'},
+  { key:'outfordelivery_pm',  label:'🚚 Out for delivery — afternoon route',     group:'Out for Delivery'},
+  { key:'ofd_second_attempt', label:'🚚 Out for delivery — second attempt today',group:'Out for Delivery'},
+  // ── IN TRANSIT ────────────────────────────────────────────────
+  { key:'transit',            label:'📦 In transit — mid-route',                group:'In Transit'      },
+  { key:'transit_early',      label:'📦 In transit — just departed Ottawa',      group:'In Transit'      },
+  { key:'transit_near',       label:'📦 In transit — near destination',          group:'In Transit'      },
+  // ── DELAYED ───────────────────────────────────────────────────
+  { key:'delayed_sort',       label:'⚠️ Delayed — sorting error',               group:'Delayed'         },
+  { key:'missed_conn',        label:'⚠️ Delayed — missed connection',            group:'Delayed'         },
+  { key:'disruption_weather', label:'⚠️ Delayed — severe weather',              group:'Delayed'         },
+  { key:'disruption_road',    label:'⚠️ Delayed — road conditions',             group:'Delayed'         },
+  { key:'disruption_mech',    label:'⚠️ Delayed — vehicle mechanical issue',    group:'Delayed'         },
+  { key:'delayed_volume',     label:'⚠️ Delayed — high package volume',         group:'Delayed'         },
+  { key:'delayed_address',    label:'⚠️ Delayed — address verification required',group:'Delayed'        },
+  { key:'delayed_weight',     label:'⚠️ Delayed — weight discrepancy on label', group:'Delayed'         },
+  { key:'delayed_damaged',    label:'⚠️ Delayed — package damage inspection',   group:'Delayed'         },
+  { key:'delayed_holiday',    label:'⚠️ Delayed — statutory holiday service',   group:'Delayed'         },
+  // ── RESCHEDULED ───────────────────────────────────────────────
+  { key:'rescheduled',        label:'🔄 Rescheduled — next business day',        group:'Delayed'         },
+  { key:'rescheduled_cust',   label:'🔄 Rescheduled — at customer request',      group:'Delayed'         },
+  { key:'attempted_nosig',    label:'🔄 Attempted — no one home (signature req)',group:'Delayed'         },
+  { key:'attempted_access',   label:'🔄 Attempted — access denied/restricted',   group:'Delayed'         },
+  { key:'attempted_refused',  label:'🔄 Attempted — recipient refused delivery', group:'Delayed'         },
+  // ── HELD / EXCEPTION ──────────────────────────────────────────
+  { key:'held_facility',      label:'🏢 Held at facility — customer contact req',group:'Delayed'         },
+  { key:'held_pickup',        label:'🏢 Held at depot — available for pickup',   group:'Delayed'         },
+  { key:'address_issue',      label:'🏢 On hold — address issue',                group:'Delayed'         },
+  { key:'exception_investigation', label:'🔍 Under investigation — shipment exception', group:'Delayed' },
+  // ── RETURN ────────────────────────────────────────────────────
+  { key:'return_transit',     label:'↩️ Return — in transit back to Ottawa',     group:'Delayed'         },
+  // ── PENDING ───────────────────────────────────────────────────
+  { key:'pending',            label:'🕐 Pending — just picked up',               group:'Pending'         },
+  { key:'pending_label',      label:'🕐 Pending — label created, not yet picked up', group:'Pending'    },
+];
+
+// Maps scenario key → tracking status pill
+const SCENARIO_STATUS = {
+  clean:'delivered', clean_signature:'delivered', clean_door:'delivered',
+  clean_reception:'delivered', clean_locker:'delivered',
+  outfordelivery:'outfordelivery', outfordelivery_pm:'outfordelivery', ofd_second_attempt:'outfordelivery',
+  transit:'transit', transit_early:'transit', transit_near:'transit',
+  delayed_sort:'delayed', missed_conn:'delayed', disruption_weather:'delayed',
+  disruption_road:'delayed', disruption_mech:'delayed', delayed_volume:'delayed',
+  delayed_address:'delayed', delayed_weight:'delayed', delayed_damaged:'delayed',
+  delayed_holiday:'delayed', rescheduled:'delayed', rescheduled_cust:'delayed',
+  attempted_nosig:'delayed', attempted_access:'delayed', attempted_refused:'delayed',
+  held_facility:'delayed', held_pickup:'delayed', address_issue:'delayed',
+  exception_investigation:'delayed', return_transit:'delayed',
+  pending:'pending', pending_label:'pending',
+};
+
+// How many route steps to include per scenario (fraction 0–1, or 'all')
+const SCENARIO_STEPS = {
+  pending_label: 0, pending: 0,
+  transit_early: 0.25, transit: 0.55, transit_near: 0.85,
+  // all others → all steps
+};
+
+// ── Status config ─────────────────────────────────────────────────
+const STATUS_CYCLE  = ['delivered','transit','outfordelivery','delayed','pending'];
+const STATUS_LABELS = { delivered:'Delivered', transit:'In Transit', outfordelivery:'Out for Delivery', delayed:'Delayed', pending:'Pending' };
+const STATUS_CLS    = { delivered:'sp-delivered', transit:'sp-transit', outfordelivery:'sp-outfordelivery', delayed:'sp-delayed', pending:'sp-pending' };
+const STATUS_PROG   = { delivered:100, transit:60, outfordelivery:85, delayed:50, pending:15 };
+const PROG_CLASS    = { delivered:'done', delayed:'delayed' };
+
+let pkgSeq = 1040;
+
+// ══════════════════════════════════════════════════════════════════
+// ROUTE BUILDER
+// ══════════════════════════════════════════════════════════════════
+function rand(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+function pad2(n)   { return String(n).padStart(2,'0'); }
+
+function formatDate(d) {
+  const days   = ['Sun.','Mon.','Tue.','Wed.','Thu.','Fri.','Sat.'];
+  const months = ['Jan.','Feb.','Mar.','Apr.','May','Jun.','Jul.','Aug.','Sep.','Oct.','Nov.','Dec.'];
+  let h = d.getHours(), m = d.getMinutes(), ampm = h>=12 ? 'p.m.' : 'a.m.';
+  h = h%12 || 12;
+  return `${days[d.getDay()]} ${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} - ${h}:${pad2(m)} ${ampm}`;
+}
+
+// ── Helper: build a Date anchored to a specific day+hour after pickup ──
+function routeTime(pickup, dayOffset, hour, minVariance) {
+  const d = new Date(pickup);
+  d.setDate(d.getDate() + dayOffset);
+  d.setHours(hour, Math.floor(Math.random() * (minVariance || 20)), 0, 0);
+  return d;
+}
+
+// ── Snap to delivery morning (5:00–6:00 AM) on a given day ──
+function snapOnTruck(pickup, dayOffset) {
+  const d = new Date(pickup);
+  d.setDate(d.getDate() + dayOffset);
+  d.setHours(5, Math.floor(Math.random()*30), 0, 0); // 5:00–5:30 AM
+  return d;
+}
+
+// ── Snap to delivery window (9:30 AM–1:00 PM) on a given day ──
+function snapDelivered(pickup, dayOffset) {
+  const d = new Date(pickup);
+  d.setDate(d.getDate() + dayOffset);
+  const baseMin = 9*60 + 30; // 9:30 AM in minutes
+  const addMin  = Math.floor(Math.random()*210); // up to 3.5h later = 1:00 PM
+  d.setHours(Math.floor((baseMin+addMin)/60), (baseMin+addMin)%60, 0, 0);
+  return d;
+}
+
+// Cities that are served directly from Ottawa without a major hub transit
+const QC_NEAR_CITIES  = new Set(['Gatineau, QC']);
+const QC_EAST_CITIES  = new Set(['Québec City, QC','Lévis, QC','Saguenay, QC','Rimouski, QC',
+                                  'Shawinigan, QC','Victoriaville, QC']);
+const ON_EAST_CITIES  = new Set(['Kingston, ON','Peterborough, ON']);
+
+function buildRoute(province, scenario, deliveryDaysAgo=0) {
+  const cities   = CITIES[province];
+  const isQC     = province === 'QC';
+  const namePool = isQC ? NAMES.QC : NAMES.EN;
+  const dest     = rand(cities);
+  const name     = rand(namePool);
+
+  // ── Pick the correct route based on destination ───────────────
+  let routeKey = province;
+  if (province === 'QC') {
+    if (QC_NEAR_CITIES.has(dest.name))  routeKey = 'QC_NEAR';
+    else if (QC_EAST_CITIES.has(dest.name)) routeKey = 'QC_EAST';
+  } else if (province === 'ON') {
+    if (ON_EAST_CITIES.has(dest.name)) routeKey = 'ON_EAST';
+  }
+  const route    = ROUTES[routeKey];
+  const delivDay = route.transitDays; // 1 for near, 2 for QC/ON, 3 for others
+
+  // ── Core date logic ───────────────────────────────────────────
+  // deliveryDaysAgo = 0 → delivery happens on MASTER_DATE (today)
+  // deliveryDaysAgo = N → delivery happened N days before MASTER_DATE
+  //
+  // Delivery date = MASTER_DATE - deliveryDaysAgo
+  // Pickup date   = DeliveryDate - delivDay
+  //
+  // This guarantees:
+  //   • outfordelivery (deliveryDaysAgo=0) → truck is out TODAY
+  //   • transit (deliveryDaysAgo=0)       → pickup was delivDay days ago, delivery upcoming today
+  //   • clean (deliveryDaysAgo=1)         → delivered yesterday
+  //
+  const deliveryDate = new Date(MASTER_DATE);
+  deliveryDate.setDate(deliveryDate.getDate() - deliveryDaysAgo);
+
+  const pickup = new Date(deliveryDate);
+  pickup.setDate(pickup.getDate() - delivDay);
+  pickup.setHours(14, 0, 0, 0); // placeholder — overridden by label block below
+
+  // Label/pickup window: 2:00 PM – 4:00 PM on pickup day
+  // labelCreated → labelInfo (+8-15 min) → pickedUp (+20-40 min)
+  const labelHour = 14 + Math.floor(Math.random() * 2); // 14 or 15
+  const labelMin  = Math.floor(Math.random() * 45);      // :00 to :44
+  const labelTime = new Date(pickup);
+  labelTime.setHours(labelHour, labelMin, 0, 0);
+  const labelInfoTime = new Date(labelTime.getTime() + (8 + Math.floor(Math.random()*8))*60000);
+  pickup.setHours(labelHour, labelMin + 25 + Math.floor(Math.random()*20), 0, 0);
+  // Clamp pickup to max 4:00 PM
+  if (pickup.getHours() >= 16) pickup.setHours(15, 50 + Math.floor(Math.random()*9), 0, 0);
+
+  const events = [];
+
+  // ── Step 1: Label events ──────────────────────────────────────
+  events.push({ time:labelTime,     city:'PUROLATOR',   desc:'Shipper created label', alert:false });
+  events.push({ time:labelInfoTime, city:'PUROLATOR',   desc:'Label information electronically submitted', alert:false });
+  events.push({ time:pickup,        city:'Ottawa, ON',  desc:'Picked up by Purolator', alert:false });
+
+  // ── Step 2: Hub steps (resolve __DEST__ → actual dest name) ──
+  const totalSteps = route.steps.length;
+  const stepFrac   = SCENARIO_STEPS[scenario];
+  const stepsToInclude = (stepFrac === undefined)
+    ? totalSteps
+    : Math.max(0, Math.floor(totalSteps * stepFrac));
+
+  for (let i = 0; i < stepsToInclude; i++) {
+    const s    = route.steps[i];
+    const city = s.hub === '__DEST__' ? dest.name : s.hub;
+    const t    = routeTime(pickup, s.day, s.hour, 20);
+    events.push({ time:t, city, desc:s.desc, alert:false });
+  }
+
+  // helper — get last hub city from steps included so far
+  const lastHubCity = () => {
+    for(let i=stepsToInclude-1; i>=0; i--){
+      const h = route.steps[i].hub;
+      if(h !== '__DEST__') return h;
+    }
+    return 'Ottawa, ON';
+  };
+
+  // helper — alert time: just after last included step
+  const alertTime = (plusHours=1) => {
+    if(stepsToInclude === 0) return new Date(pickup.getTime() + plusHours*3600000);
+    const ls = route.steps[stepsToInclude-1];
+    return new Date(routeTime(pickup, ls.day, ls.hour, 5).getTime() + plusHours*3600000);
+  };
+
+  // ── Step 3: Terminal events by scenario ──────────────────────
+
+  // ── CLEAN DELIVERIES ─────────────────────────────────────────
+  const DELIVERED_DESCS = {
+    clean:           'Delivered',
+    clean_signature: 'Delivered — Signature obtained',
+    clean_door:      'Delivered — Left at front door',
+    clean_reception: 'Delivered — Left at reception / front desk',
+    clean_locker:    'Delivered — Deposited in parcel locker',
+  };
+  if (DELIVERED_DESCS[scenario]) {
+    const onTruck   = snapOnTruck(pickup, delivDay);
+    const delivered = snapDelivered(pickup, delivDay);
+    let delivDesc = DELIVERED_DESCS[scenario].replace('{N}', Math.floor(Math.random()*20)+1);
+    events.push({ time:onTruck,   city:dest.name, desc:'On vehicle for delivery', alert:false });
+    events.push({ time:delivered, city:dest.name, desc:delivDesc,                 alert:false });
+  }
+
+  // ── OUT FOR DELIVERY ─────────────────────────────────────────
+  else if (scenario === 'outfordelivery') {
+    events.push({ time:snapOnTruck(pickup, delivDay), city:dest.name, desc:'On vehicle for delivery', alert:false });
+  }
+  else if (scenario === 'outfordelivery_pm') {
+    const t = new Date(pickup); t.setDate(t.getDate()+delivDay); t.setHours(12,10+Math.floor(Math.random()*30),0,0);
+    events.push({ time:t, city:dest.name, desc:'On vehicle for delivery', alert:false });
+  }
+  else if (scenario === 'ofd_second_attempt') {
+    const first = snapOnTruck(pickup, delivDay);
+    const noone = new Date(first.getTime() + (3+Math.floor(Math.random()*3))*3600000);
+    // Second attempt same day (later in the morning/afternoon, not tomorrow)
+    const second = new Date(noone.getTime() + (2+Math.floor(Math.random()*2))*3600000);
+    events.push({ time:first,  city:dest.name, desc:'On vehicle for delivery', alert:false });
+    events.push({ time:noone,  city:dest.name, desc:'Delivery attempted — no one available to accept shipment', alert:true });
+    events.push({ time:second, city:dest.name, desc:'On vehicle for delivery — second attempt', alert:false });
+  }
+
+  // ── RESCHEDULED / ATTEMPTED ───────────────────────────────────
+  else if (scenario === 'rescheduled') {
+    const onTruck = snapOnTruck(pickup, delivDay);
+    const fail    = new Date(onTruck.getTime() + (5+Math.floor(Math.random()*4))*3600000);
+    events.push({ time:onTruck, city:dest.name, desc:'On vehicle for delivery', alert:false });
+    events.push({ time:fail,    city:dest.name, desc:'Delivery rescheduled for the next business day', alert:true });
+  }
+  else if (scenario === 'rescheduled_cust') {
+    const onTruck = snapOnTruck(pickup, delivDay);
+    const fail    = new Date(onTruck.getTime() + 2*3600000);
+    events.push({ time:onTruck, city:dest.name, desc:'On vehicle for delivery', alert:false });
+    events.push({ time:fail,    city:dest.name, desc:'Delivery rescheduled — rescheduled at customer request', alert:true });
+  }
+  else if (scenario === 'attempted_nosig') {
+    const onTruck = snapOnTruck(pickup, delivDay);
+    const attempt = new Date(onTruck.getTime() + (3+Math.floor(Math.random()*4))*3600000);
+    events.push({ time:onTruck,  city:dest.name, desc:'On vehicle for delivery', alert:false });
+    events.push({ time:attempt,  city:dest.name, desc:'Delivery attempted — signature required, no one home to sign', alert:true });
+  }
+  else if (scenario === 'attempted_access') {
+    const onTruck = snapOnTruck(pickup, delivDay);
+    const attempt = new Date(onTruck.getTime() + (2+Math.floor(Math.random()*3))*3600000);
+    events.push({ time:onTruck,  city:dest.name, desc:'On vehicle for delivery', alert:false });
+    events.push({ time:attempt,  city:dest.name, desc:'Delivery attempted — access to location denied or restricted', alert:true });
+  }
+  else if (scenario === 'attempted_refused') {
+    const onTruck = snapOnTruck(pickup, delivDay);
+    const attempt = new Date(onTruck.getTime() + (2+Math.floor(Math.random()*4))*3600000);
+    events.push({ time:onTruck,  city:dest.name, desc:'On vehicle for delivery', alert:false });
+    events.push({ time:attempt,  city:dest.name, desc:'Delivery refused by recipient — shipment being returned to sender', alert:true });
+  }
+
+  // ── HELD / EXCEPTION ─────────────────────────────────────────
+  else if (scenario === 'held_facility') {
+    const t = alertTime(2);
+    events.push({ time:t, city:dest.name, desc:'Shipment held at facility — customer contact required', alert:true });
+  }
+  else if (scenario === 'held_pickup') {
+    const arrive  = routeTime(pickup, delivDay, 8, 20);
+    const heldAt  = new Date(arrive.getTime() + 3600000);
+    events.push({ time:arrive, city:dest.name, desc:'Arrived at sort facility', alert:false });
+    events.push({ time:heldAt, city:dest.name, desc:'Shipment held at depot — available for customer pickup', alert:true });
+  }
+  else if (scenario === 'address_issue') {
+    const t = alertTime(1.5);
+    events.push({ time:t, city:lastHubCity(), desc:'Shipment on hold — address information cannot be verified', alert:true });
+  }
+  else if (scenario === 'exception_investigation') {
+    const t = alertTime(2);
+    events.push({ time:t, city:lastHubCity(), desc:'Shipment exception — investigation initiated. Please contact Purolator for assistance.', alert:true });
+  }
+  else if (scenario === 'return_transit') {
+    const returnStart = alertTime(1);
+    const returnMid   = new Date(returnStart.getTime() + 8*3600000);
+    events.push({ time:returnStart, city:dest.name,    desc:'Return initiated — shipment being returned to sender', alert:true });
+    events.push({ time:returnMid,   city:'Ottawa, ON', desc:'Return shipment in transit — arrived at Ottawa facility', alert:false });
+  }
+
+  // ── DELAYED ──────────────────────────────────────────────────
+  else if (scenario === 'delayed_sort') {
+    events.push({ time:alertTime(1), city:lastHubCity(), desc:'Delayed by 1 business day due to sorting error', alert:true });
+  }
+  else if (scenario === 'missed_conn') {
+    events.push({ time:alertTime(2), city:lastHubCity(), desc:'Delayed in transit due to missed connection', alert:true });
+  }
+  else if (scenario === 'disruption_weather') {
+    events.push({ time:alertTime(1), city:lastHubCity(), desc:'Delayed in transit due to severe weather conditions', alert:true });
+  }
+  else if (scenario === 'disruption_road') {
+    events.push({ time:alertTime(1), city:lastHubCity(), desc:'Delayed in transit — road closure on service route', alert:true });
+  }
+  else if (scenario === 'disruption_mech') {
+    events.push({ time:alertTime(2), city:lastHubCity(), desc:'Delayed in transit — vehicle mechanical issue on service route', alert:true });
+  }
+  else if (scenario === 'delayed_volume') {
+    events.push({ time:alertTime(2), city:lastHubCity(), desc:'Delayed due to higher than expected package volume', alert:true });
+  }
+  else if (scenario === 'delayed_address') {
+    events.push({ time:alertTime(1), city:'Ottawa, ON', desc:'Delayed — address verification required before shipment can proceed', alert:true });
+  }
+  else if (scenario === 'delayed_weight') {
+    events.push({ time:alertTime(1), city:'Ottawa, ON', desc:'Delayed — weight discrepancy between label and actual shipment weight', alert:true });
+  }
+  else if (scenario === 'delayed_damaged') {
+    events.push({ time:alertTime(2), city:lastHubCity(), desc:'Delayed — package damage inspection in progress', alert:true });
+  }
+  else if (scenario === 'delayed_holiday') {
+    events.push({ time:alertTime(4), city:lastHubCity(), desc:'Delayed — statutory holiday affecting service on this route', alert:true });
+  }
+  // transit_early, transit, transit_near, pending, pending_label → no terminal event
+
+  // ── Step 4: Sort newest→oldest, build rows ────────────────────
+  events.sort((a,b) => b.time - a.time);
+  const rows = events.map(e => ({
+    date: formatDate(e.time),
+    city: e.city,
+    desc: e.desc,
+    alert: e.alert,
+    minuteOffset: Math.round((e.time - MASTER_DATE) / 60000),
+  }));
+
+  pkgSeq++;
+  const tracking = '329' + String(180042000 + pkgSeq);
+  const label    = `Order #${pkgSeq} — ${name}`;
+  const status = SCENARIO_STATUS[scenario] || 'transit';
+
+  return { tracking, label, status, dest:dest.name, province, rows };
+}
+
+// ══════════════════════════════════════════════════════════════════
+// UI BUILDER
+// ══════════════════════════════════════════════════════════════════
+function makeTrackRow(r) {
+  const tr = document.createElement('tr');
+  if (r.alert) tr.classList.add('alert-row');
+  if (r.minuteOffset !== undefined) tr.dataset.minuteOffset = r.minuteOffset;
+  tr.innerHTML = `
+    <td class="td-date"><span contenteditable="true">${r.date}</span></td>
+    <td class="td-city"><span contenteditable="true">${r.city}</span></td>
+    <td class="td-desc"><span contenteditable="true">${r.desc}</span></td>
+    <td class="row-actions"><button class="del-row">✕</button></td>
+  `;
+  tr.querySelector('.td-date').addEventListener('dblclick', () => tr.classList.toggle('alert-row'));
+  tr.querySelector('.del-row').addEventListener('click', e => { e.stopPropagation(); tr.remove(); });
+  return tr;
+}
+
+function makePkgCard(pkg, open=false) {
+  const card = document.createElement('div');
+  card.className = 'pkg-card' + (open ? ' open' : '');
+  card.dataset.status = pkg.status;
+
+  // ── Header ──
+  const header = document.createElement('div');
+  header.className = 'pkg-header';
+
+  const left = document.createElement('div');
+  left.className = 'pkg-left';
+
+  const trackEl = document.createElement('span');
+  trackEl.className = 'pkg-tracking';
+  trackEl.contentEditable = 'true';
+  trackEl.textContent = pkg.tracking;
+  trackEl.addEventListener('click', e => e.stopPropagation());
+
+  const meta = document.createElement('div');
+  meta.className = 'pkg-meta';
+
+  const labelEl = document.createElement('span');
+  labelEl.className = 'pkg-label';
+  labelEl.contentEditable = 'true';
+  labelEl.textContent = pkg.label;
+  labelEl.addEventListener('click', e => e.stopPropagation());
+
+  const destEl = document.createElement('span');
+  destEl.className = 'pkg-dest';
+  destEl.textContent = '→ ' + (pkg.dest || '');
+
+  meta.appendChild(labelEl);
+  meta.appendChild(destEl);
+  left.appendChild(trackEl);
+  left.appendChild(meta);
+
+  // Status pill
+  const pill = document.createElement('span');
+  pill.className = 'status-pill ' + STATUS_CLS[pkg.status];
+  pill.textContent = STATUS_LABELS[pkg.status];
+  pill.dataset.status = pkg.status;
+  pill.title = 'Click to cycle status';
+  pill.addEventListener('click', e => {
+    e.stopPropagation();
+    const idx  = STATUS_CYCLE.indexOf(pill.dataset.status);
+    const next = STATUS_CYCLE[(idx+1)%STATUS_CYCLE.length];
+    pill.dataset.status = next;
+    card.dataset.status = next;
+    pill.className = 'status-pill ' + STATUS_CLS[next];
+    pill.textContent = STATUS_LABELS[next];
+    // update progress
+    const fill = card.querySelector('.progress-fill');
+    if (fill) {
+      fill.style.width = STATUS_PROG[next] + '%';
+      fill.className = 'progress-fill ' + (PROG_CLASS[next]||'');
+    }
+    applyFilter(currentFilter);
+  });
+
+  const chev = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  chev.setAttribute('viewBox','0 0 24 24'); chev.setAttribute('fill','none');
+  chev.setAttribute('stroke','currentColor'); chev.setAttribute('stroke-width','2.2');
+  chev.setAttribute('class','chevron');
+  chev.innerHTML = '<polyline points="6 9 12 15 18 9"/>';
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'pkg-del';
+  delBtn.textContent = '✕';
+  delBtn.title = 'Remove package';
+  delBtn.addEventListener('click', e => { e.stopPropagation(); card.remove(); updateCount(); applyFilter(currentFilter); });
+
+  const right = document.createElement('div');
+  right.className = 'pkg-right';
+  right.appendChild(pill); right.appendChild(chev); right.appendChild(delBtn);
+
+  header.appendChild(left); header.appendChild(right);
+  header.addEventListener('click', () => card.classList.toggle('open'));
+
+  // ── Body ──
+  const body = document.createElement('div');
+  body.className = 'pkg-body';
+
+  // Progress bar
+  const progPct = STATUS_PROG[pkg.status] || 20;
+  const progCls = PROG_CLASS[pkg.status] || '';
+  const pWrap = document.createElement('div');
+  pWrap.className = 'progress-wrap';
+  pWrap.innerHTML = `
+    <div class="progress-label">
+      <span>Ottawa, ON</span>
+      <span>${pkg.dest || '—'}</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill ${progCls}" style="width:${progPct}%"></div></div>
+  `;
+  body.appendChild(pWrap);
+
+  // Table
+  const table = document.createElement('table');
+  table.className = 'track-table';
+  table.innerHTML = `<thead><tr><th>Date</th><th>City</th><th>Description</th><th></th></tr></thead>`;
+  const tbody = document.createElement('tbody');
+  (pkg.rows||[]).forEach(r => tbody.appendChild(makeTrackRow(r)));
+  table.appendChild(tbody);
+  body.appendChild(table);
+  // Store minute offsets for date re-rendering
+  requestAnimationFrame(() => {
+    const offsets = [...card.querySelectorAll('.td-date [contenteditable]')].map((_, i) => {
+      const row = card.querySelectorAll('tbody tr')[i];
+      return row ? Number(row.dataset.minuteOffset || 0) : 0;
+    });
+    CARD_OFFSETS.set(card, offsets);
+  });
+
+  // Add-row bar
+  const addBar = document.createElement('div');
+  addBar.className = 'add-row-bar';
+  const btnNorm = document.createElement('button');
+  btnNorm.className = 'btn-add-row'; btnNorm.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print';
+  btnNorm.title = 'Print this shipment';
+  btnNorm.addEventListener('click', e => { e.stopPropagation(); window.print(); });
+  const btnAlert = document.createElement('button');
+  btnAlert.className = 'btn-add-row btn-add-alert'; btnAlert.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13"/><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Send tracking info';
+  btnAlert.title = 'Send tracking info to recipient';
+  btnAlert.addEventListener('click', e => { e.stopPropagation(); });
+  addBar.appendChild(btnNorm); addBar.appendChild(btnAlert);
+  body.appendChild(addBar);
+
+  card.appendChild(header); card.appendChild(body);
+  return card;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// FILTER + COUNT
+// ══════════════════════════════════════════════════════════════════
+let currentFilter = 'all';
+
+function applyFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter===f));
+  document.querySelectorAll('.pkg-card').forEach(c => {
+    c.style.display = (f==='all' || c.dataset.status===f) ? '' : 'none';
+  });
+  updateCount();
+}
+
+function updateCount() {
+  const visible = [...document.querySelectorAll('.pkg-card')].filter(c=>c.style.display!=='none').length;
+  document.getElementById('pkg-count').textContent = visible + ' package' + (visible!==1?'s':'');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PROVINCE POOL — 75% outside QC, 25% QC
+// ══════════════════════════════════════════════════════════════════
+const PROVINCE_POOL = [
+  // 25% QC
+  'QC','QC','QC','QC','QC',
+  // 75% outside QC (equal spread across provinces)
+  'ON','ON','ON','ON',
+  'BC','BC','BC',
+  'AB','AB','AB',
+  'NS','NS',
+  'NB','NB',
+  'MB','MB',
+  'SK',
+  'NL',
+  'PE',
+];
+function randProvince() { return rand(PROVINCE_POOL); }
+
+// ══════════════════════════════════════════════════════════════════
+// DELIVERED SCENARIOS pool (for history generation)
+// ══════════════════════════════════════════════════════════════════
+const DELIVERED_SCENARIOS = [
+  // 90% standard "Delivered"
+  'clean','clean','clean','clean','clean',
+  'clean','clean','clean','clean',
+  // 10% variants
+  'clean_door','clean_locker','clean_reception','clean_signature',
+];
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// deliveryDaysAgo=0 → delivery is TODAY (MASTER_DATE)
+// deliveryDaysAgo=N → delivery was N days ago
+// ══════════════════════════════════════════════════════════════════
+const list = document.getElementById('packages-list');
+
+// ── Scenario weighted pools ──────────────────────────────────────
+const OFD_SCENARIOS = [
+  'outfordelivery','outfordelivery','outfordelivery',   // 3× standard (most common)
+  'outfordelivery_pm','outfordelivery_pm',               // 2× afternoon
+  'ofd_second_attempt',                                  // 1× second attempt
+];
+const TRANSIT_SCENARIOS = [
+  'transit','transit','transit','transit',               // 4× mid-route (most common)
+  'transit_near','transit_near',                         // 2× near destination
+  'transit_early',                                       // 1× just departed
+];
+
+// ── Build today's active packages pool: 25 OFD + 55 transit + 12 delivered
+// then Fisher-Yates shuffle the whole pool for a realistic mixed list ──
+const todayPkgs = [];
+
+for (let i = 0; i < 25; i++)
+  todayPkgs.push(buildRoute(randProvince(), OFD_SCENARIOS[i % OFD_SCENARIOS.length], 0));
+
+for (let i = 0; i < 55; i++)
+  todayPkgs.push(buildRoute(randProvince(), TRANSIT_SCENARIOS[i % TRANSIT_SCENARIOS.length], 0));
+
+// 12 delivered today sprinkled throughout
+for (let i = 0; i < 12; i++)
+  todayPkgs.push(buildRoute(randProvince(), rand(DELIVERED_SCENARIOS), 0));
+
+// Fisher-Yates shuffle — truly random order
+for (let i = todayPkgs.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [todayPkgs[i], todayPkgs[j]] = [todayPkgs[j], todayPkgs[i]];
+}
+
+// Add to DOM — all collapsed
+todayPkgs.forEach(pkg => list.appendChild(makePkgCard(pkg, false)));
+
+// ── 1 Delayed + 1 Pending — always at the end of today's list ────
+list.appendChild(makePkgCard(buildRoute(rand(PROVINCE_POOL), 'delayed_sort', 0), false));
+list.appendChild(makePkgCard(buildRoute(rand(PROVINCE_POOL), 'pending', 0), false));
+
+// ── Delivered last 10 days — 35 to 40 per day ────────────────────
+for (let day = 1; day <= 10; day++) {
+  const count = 35 + Math.floor(Math.random() * 6); // 35–40 per day
+  for (let i = 0; i < count; i++) {
+    list.appendChild(makePkgCard(buildRoute(randProvince(), rand(DELIVERED_SCENARIOS), day), false));
+  }
+}
+
+updateCount();
+
+// ══════════════════════════════════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════════════════════════════════
+const overlay = document.getElementById('modal-overlay');
+
+document.getElementById('btn-generate').addEventListener('click', () => {
+  overlay.classList.add('visible');
+});
+document.getElementById('btn-modal-cancel').addEventListener('click', () => {
+  overlay.classList.remove('visible');
+});
+overlay.addEventListener('click', e => { if (e.target===overlay) overlay.classList.remove('visible'); });
+
+// ── Populate scenario dropdown from SCENARIO_DEFS ────────────────
+(function(){
+  const sel = document.getElementById('sel-scenario');
+  const groups = {};
+  SCENARIO_DEFS.forEach(def => {
+    if (!groups[def.group]) {
+      const og = document.createElement('optgroup');
+      og.label = '── ' + def.group + ' ──';
+      sel.appendChild(og);
+      groups[def.group] = og;
+    }
+    const opt = document.createElement('option');
+    opt.value = def.key;
+    opt.textContent = def.label;
+    groups[def.group].appendChild(opt);
+  });
+})();
+
+document.getElementById('btn-modal-generate').addEventListener('click', () => {
+  let province     = document.getElementById('sel-province').value;
+  let scenario     = document.getElementById('sel-scenario').value;
+  const labelOverride = document.getElementById('inp-label').value.trim();
+  const qty        = parseInt(document.getElementById('inp-qty').value, 10) || 1;
+
+  // Use DocumentFragment for bulk inserts — much faster than individual DOM ops
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < qty; i++) {
+    const prov = (province === '__RANDOM__') ? randProvince() : province;
+    const scen = (scenario === '__RANDOM__') ? rand(SCENARIO_DEFS).key : scenario;
+    const pkg  = buildRoute(prov, scen);
+    // Only apply label override on single-shipment generations
+    if (qty === 1 && labelOverride) pkg.label = labelOverride;
+    // Only open first card when bulk-generating
+    frag.prepend(makePkgCard(pkg, i === 0));
+  }
+  list.prepend(frag);
+  list.firstElementChild.scrollIntoView({ behavior:'smooth', block:'start' });
+  applyFilter(currentFilter);
+  updateCount();
+
+  document.getElementById('inp-label').value = '';
+  document.getElementById('inp-qty').value = 1;
+  document.getElementById('qty-display').textContent = '1';
+  overlay.classList.remove('visible');
+});
+
+// ══════════════════════════════════════════════════════════════════
+// FILTER BUTTONS
+// ══════════════════════════════════════════════════════════════════
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
+});
+
+// EXPAND / COLLAPSE ALL
+document.getElementById('btn-expand-all').addEventListener('click', () => {
+  document.querySelectorAll('.pkg-card').forEach(c => c.classList.add('open'));
+});
+document.getElementById('btn-collapse-all').addEventListener('click', () => {
+  document.querySelectorAll('.pkg-card').forEach(c => c.classList.remove('open'));
+});
+
+
+// ══════════════════════════════════════════════════════════════════
+// DATE CONTROL — apply master date to all packages
+// ══════════════════════════════════════════════════════════════════
+(function(){
+  // Set today as default in the date input
+  const inp = document.getElementById('master-date');
+  // Use local date to avoid UTC timezone offset showing wrong day
+  const today = new Date();
+  const localDate = today.getFullYear() + '-' +
+    String(today.getMonth()+1).padStart(2,'0') + '-' +
+    String(today.getDate()).padStart(2,'0');
+  inp.value = localDate;
+
+  document.getElementById('btn-apply-date').addEventListener('click', () => {
+    const val = inp.value;
+    if(!val) return;
+
+    setMasterDate(val);
+    const [y,m,d] = val.split('-').map(Number);
+    const refDate = new Date(y, m-1, d, 0, 0, 0); // midnight — must match MASTER_DATE base
+
+    // Re-render all date cells on the page using stored offsets
+    CARD_OFFSETS.forEach((offsets, card) => {
+      const dateCells = card.querySelectorAll('.td-date [contenteditable]');
+      dateCells.forEach((cell, i) => {
+        if(offsets[i] !== undefined) {
+          const newDate = new Date(refDate.getTime() + offsets[i] * 60000);
+          cell.textContent = formatDate(newDate);
+        }
+      });
+    });
+  });
+})();
+
+// ══════════════════════════════════════════════════════════════════
+// PAGINATION — each page shows 80 delivered packages
+// Page 1 keeps the full init list (transit + OFD + delivered history)
+// Pages 2–10 clear the list and generate 80 fresh delivered packages
+// ══════════════════════════════════════════════════════════════════
+let currentPage = 1;
+
+function generateDeliveredPage() {
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < 80; i++) {
+    // Random delivery date from 1 to 30 days ago for realistic spread
+    const daysAgo = 1 + Math.floor(Math.random() * 30);
+    const pkg  = buildRoute(randProvince(), rand(DELIVERED_SCENARIOS), daysAgo);
+    frag.appendChild(makePkgCard(pkg, false));
+  }
+  return frag;
+}
+
+function setPage(n) {
+  currentPage = n;
+  // Highlight active page button
+  for (let i = 1; i <= 10; i++) {
+    const btn = document.getElementById('pg-' + i);
+    if (btn) btn.classList.toggle('active', i === n);
+  }
+
+  if (n > 1) {
+    // Clear current packages list and fill with 80 delivered packages
+    const pkgList = document.getElementById('packages-list');
+    pkgList.innerHTML = '';
+    pkgList.appendChild(generateDeliveredPage());
+    // Force filter to delivered so only delivered show
+    applyFilter('delivered');
+  } else {
+    // Page 1 — reload the page to restore the full initial list
+    location.reload();
+  }
+
+  // Scroll to top of packages list
+  document.getElementById('packages-list').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+</script>
+</body>
+</html>
